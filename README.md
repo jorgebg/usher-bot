@@ -1,4 +1,4 @@
-starter-python-bot
+usher-bot
 =============
 
 ## Overview
