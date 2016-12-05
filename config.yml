@@ -1,0 +1,89 @@
+Bearer: your-token-here
+
+categories:
+
+    - channel:
+        board: 'Engineering: Channel'
+        list: Inbox
+        terms:
+            - channel
+
+    - discovery:
+        board: 'Engineering: Search'
+        list: Inbox
+        terms:
+            - discovery
+            - index
+            - search
+
+    - queue:
+        board: 'Engineering: Team Q'
+        list: Inbox
+        terms:
+            - coding_exercises
+            - quiz
+
+    - u:
+        board: 'Engineering: Team U'
+        list: Inbox
+        terms:
+            - clp
+    - g:
+        board: 'Engineering: Team G'
+        list: Inbox
+        terms:
+            - AppleInAppPurchaseConnectionException
+            - facebookads
+            - googleapis
+            - preview video
+
+    - tea:
+        board: 'Engineering: Team Tea'
+        list: Inbox
+        terms:
+            - course_management
+            - terms
+            - ban_helper
+
+    - learning:
+        board: 'Team L - Inbox'
+        list: 
+        terms:
+            - videojs
+            - user_manage
+
+    - payments:
+        board: 'Engineering: Team A - Payment'
+        list: 
+        terms:
+            - paypal
+            - payment
+            - stripe
+            - fraud
+            - adyen
+
+    - stream:
+        board: 'Engineering: Stream Team'
+        list: Inbox
+        terms:
+             - asset
+             - image
+             - pymysql
+             - MySQL
+             - caption
+             - closed-caption-ms
+
+    - bedrock:
+        board: 'Engineering: Team Bedrock'
+        list: Inbox
+        terms:
+             - zdesk
+             - ZenDesk
+             - responsys
+
+    - ufb:
+        board: 'Engineering: UFB'
+        list: Inbox
+        terms:
+             - organization
+             - sso
