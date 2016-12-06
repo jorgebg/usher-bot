@@ -38,6 +38,7 @@ These are tasks for the related Usher project.  These need to be prioritized
 - Update bugreport tapen to use the web service to guess a team/trello board
 
 - Presentation
+    - Update beepboop resource images
     - Design logo :)
     - Take stills for science board
     - Script a demo
