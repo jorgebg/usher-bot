@@ -57,17 +57,20 @@ class Messenger(object):
     def __init__(self, slack_clients):
         self.clients = slack_clients
         self.channels = self.clients.rtm.api_call("channels.list")
+
+        creds = os.getenv("SHEETS_CREDS", "None")
+        logging.info("SHEETS_CREDS {}".format(os.getenv("SHEETS_CREDS", "None")))
+        credentials = client.Credentials.new_from_json(creds)
+
+        self.http = credentials.authorize(httplib2.Http())
+
         self.teams = self.load_config()
 
+
     def load_config(self):
-        creds = os.getenv("SHEETS_CREDS", "None")
-        logging.info("SHEETS_CREDS {}".format(creds))
-        credentials = client.Credentials.new_from_json(creds)
-    
-        http = credentials.authorize(httplib2.Http())
         discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
                         'version=v4')
-        service = discovery.build('sheets', 'v4', http=http,
+        service = discovery.build('sheets', 'v4', http=self.http,
                                 discoveryServiceUrl=discoveryUrl)
     
         spreadsheetId = '14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE'
@@ -79,7 +82,7 @@ class Messenger(object):
     
         logging.info(titles);
     
-        rangeName = 'Teams!' + 'A2:J5'
+        rangeName = 'Teams!' + 'A2:J9'
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheetId, range=rangeName).execute()
         values = result.get('values', [])
@@ -117,6 +120,9 @@ class Messenger(object):
 
     def write_team(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
+
+        self.teams = self.load_config()
+
         txt = self._team(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
