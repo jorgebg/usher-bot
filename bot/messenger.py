@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 import random
 import re
 from stemming.porter2 import stem
@@ -9,6 +10,10 @@ import yaml
 logger = logging.getLogger(__name__)
 
 config = yaml.load(open("config.yml", 'r'))
+
+sheet_creds = os.getenv("SHEET_CREDS", "None")
+
+logger.info("SHEET_CREDS " + sheet_creds)
 
 def count(term, text):
     return len(re.findall(term, text, re.I))
@@ -36,7 +41,7 @@ def categorize(text):
     scores = sorted(scores, key=lambda i: i['score'], reverse=True)
 
     if scores[0]['score'] == 0:
-        print text
+        #print text
         return 'nomatch'
 
     if scores[0]['score'] == scores[1]['score']:
