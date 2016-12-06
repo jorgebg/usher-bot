@@ -38,7 +38,7 @@ def tx(d, s):
     else :
         return x
 
-def find_team(teams, text):
+def find_teams(teams, text, m):
     scores = []
     for team in teams:
         s = score(text, team)
@@ -46,15 +46,20 @@ def find_team(teams, text):
         scores.append({'score': s, 'team': team})
 
     scores = sorted(scores, key=lambda i: i['score'], reverse=True)
+    scores = [s for s in scores if s['score'] != 0]
 
-    if scores[0]['score'] == 0:
+    if len(scores) == 0 or scores[0]['score'] == 0:
         #print text
         return 'nomatch'
 
-    if scores[0]['score'] == scores[1]['score']:
-        return 'unclear'
+    if m == 1:
+        if len(scores) > 1 and scores[0]['score'] == scores[1]['score']:
+            return 'unclear'
+        else:
+            return scores[0]['team']
     else:
-        return scores[0]['team']
+        return list(map(lambda s: s['team'], scores[0:m]))
+    
 
 class Messenger(object):
     def __init__(self, slack_clients):
@@ -86,7 +91,7 @@ class Messenger(object):
     
         logging.info(titles);
     
-        rangeName = 'Teams!' + 'A2:J10'
+        rangeName = 'Teams!' + 'A2:J12'
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheetId, range=rangeName).execute()
         values = result.get('values', [])
@@ -143,11 +148,11 @@ class Messenger(object):
         self.send_message(channel_id, txt)
 
     def _members(self, channel_id, msg_txt):
-        team = find_team(self.teams, msg_txt)
+        team = find_teams(self.teams, msg_txt, 1)
         if team == 'nomatch' :
             txt = "Sorry, I don't know!  Blame jake the dog."
         elif team == 'unclear' :
-            txt = "I'am not sure, but I will get it for you someday."
+            txt = "I am not sure, but I will get it for you someday. In the meantime, can I get you a latté?"
         else:
             logging.info("Team: " + str(team))
             name = team['Name']
@@ -159,20 +164,31 @@ class Messenger(object):
         return txt
 
     def _team(self, channel_id, msg_txt):
-        team = find_team(self.teams, msg_txt)
-        if team == 'nomatch' :
+        teams = find_teams(self.teams, msg_txt, 3)
+        if teams == 'nomatch' :
             txt = "Sorry, I don't know!  Blame jake the dog."
-        elif team == 'unclear' :
+        elif teams == 'unclear' :
             txt = "I'am not sure, but I will get it for you someday."
         else:
-            logging.info("Team: " + str(team))
-            name = team['Name']
-            channel = team['Slack channel']
-            txt = name + " owns this. See: `<" + self.lookup_channel_id(channel) + ">`"
+            n = len(teams)
+            txts = []
+
+            for team in teams:
+                logging.info("Team: " + str(team))
+                name = team['Name']
+                channel = team['Slack channel']
+                txt = name + " covers this. See: `<" + self.lookup_channel_id(channel) + ">`."
+                txts.append(txt)
+
+            if n == 1:
+                txt = txts[0]
+            else:
+                txt = " Also ".join( txts )
+
         return txt
 
     def _team_details(self, channel_id, msg_txt):
-        team = find_team(self.teams, msg_txt)
+        team = find_teams(self.teams, msg_txt, 1)
         if team == 'nomatch' :
             txt = "Sorry, I don't know!  Blame jake the dog."
         elif team == 'unclear' :

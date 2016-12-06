@@ -1,6 +1,10 @@
 usher-bot
 =============
 
+## CAVEAT EMPTOR    
+
+This code was written quickly with little regard for much other than time to barely working code.
+
 ## TODO
 
 These are tasks for the related Usher project.  These need to be prioritized
@@ -11,8 +15,11 @@ These are tasks for the related Usher project.  These need to be prioritized
     - X Configure bot to read config somehow
     - X Write input parsing code for Will's demo script
     - X Update Bot read google sheet
+    - X Handle multiple matches
     - Improve bot message parsing
-    - Improve bot message formatting (postMessage)
+    - X Improve bot message formatting 
+    - Add clever random sorry messages
+    - Listen for reactions
 
 - Config
     
