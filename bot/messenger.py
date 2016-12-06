@@ -3,6 +3,7 @@
 import logging
 import random
 import re
+from stemming.porter2 import stem
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,7 @@ def categorize(text):
 class Messenger(object):
     def __init__(self, slack_clients):
         self.clients = slack_clients
+        self.channels = self.clients.rtm.api_call("channels.list")
 
     def send_message(self, channel_id, msg):
         # in the case of Group and Private channels, RTM channel payload is a complex dictionary
@@ -57,24 +59,13 @@ class Messenger(object):
 
     def write_help_message(self, channel_id):
         bot_uid = self.clients.bot_user_id()
-        txt = '{}\n{}\n{}\n{}'.format(
+        txt = '{}\n{}'.format(
             "I'm a friendly Slack bot written in Python.  I'll *_respond_* to the following commands:",
-            "> `hi <@" + bot_uid + ">` - I'll respond with a randomized greeting mentioning your user. :wave:",
-            "> `how <@" + bot_uid + ">` - some other stuff we need to put here",
-            "> `<@" + bot_uid + "> joke` - I'll tell you one of my finest jokes, with a typing pause for effect. :laughing:",
-            "> `<@" + bot_uid + "> attachment` - I'll demo a post with an attachment using the Web API. :paperclip:")
+            "> `who` knows about _something_")
         self.send_message(channel_id, txt)
-
-    def write_greeting(self, channel_id, user_id):
-        greetings = ['Hi', 'Hello', 'Nice to meet you', 'Howdy', 'Salutations']
-        txt = '{}, <@{}>!'.format(random.choice(greetings), user_id)
-        self.send_message(channel_id, txt)
-
-    def post_answer(self, channel_id, msg_txt):
-        txt = self._answer(channel_id, msg_txt)
-        # chat.postMessage(self, channel_id, txt)
 
     def write_answer(self, channel_id, msg_txt):
+        #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
         txt = self._answer(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
@@ -90,22 +81,19 @@ class Messenger(object):
             obj = cat[name]
             channel = obj['channel']
             n = obj['board'] # should be fullname or something like that
-            txt = n + " owns this. See: #" + channel
-
+            txt = n + " owns this. See: `<" + self.lookup(channel) + ">`"
         return txt
+
+    def lookup(self, channel):
+        for x in self.channels['channels']:
+            if x['name'] == channel:
+                return '#' + x['id']
+        return "Unknown" # should assert this can't happen
 
     def write_prompt(self, channel_id):
         bot_uid = self.clients.bot_user_id()
         txt = "I'm sorry, I didn't quite understand... Can I help you? (e.g. `<@" + bot_uid + "> help`)"
         self.send_message(channel_id, txt)
-
-    def write_joke(self, channel_id):
-        question = "Why did the python cross the road?"
-        self.send_message(channel_id, question)
-        self.clients.send_user_typing_pause(channel_id)
-        answer = "To eat the chicken on the other side! :laughing:"
-        self.send_message(channel_id, answer)
-
 
     def write_error(self, channel_id, err_msg):
         txt = ":face_with_head_bandage: my maker didn't handle this error very well:\n>```{}```".format(err_msg)
