@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os
 import random
 import re
 from stemming.porter2 import stem
@@ -10,10 +9,6 @@ import yaml
 logger = logging.getLogger(__name__)
 
 config = yaml.load(open("config.yml", 'r'))
-
-sheet_creds = os.getenv("SHEET_CREDS", "None")
-
-logger.info("SHEET_CREDS " + sheet_creds)
 
 def count(term, text):
     return len(re.findall(term, text, re.I))
