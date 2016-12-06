@@ -1,6 +1,6 @@
 name: Usher Bot
 description: A Python chat bot that reads config from a google sheet and answers a few questions
-avatar: resources/avatar.png
+avatar: resources/usherbot.jpg
 background: resources/background.png
 config:
   - name: LOG_LEVEL
