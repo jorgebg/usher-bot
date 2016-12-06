@@ -3,7 +3,7 @@
 import logging
 import random
 import re
-from stemming.porter2 import stem
+#from stemming.porter2 import stem
 import yaml
 
 logger = logging.getLogger(__name__)
