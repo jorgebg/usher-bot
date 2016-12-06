@@ -7,7 +7,7 @@ config:
     friendly_name: Severity level to show for logging.
     info: See https://docs.python.org/2/library/logging.html#levels
     default: DEBUG
-  - name: SHEET_CREDS
+  - name: SHEETS_CREDS
     friendly_name: Google Sheets Credentials
     info: Credentials to give you access to Google Sheets. See here...
     type: secret
