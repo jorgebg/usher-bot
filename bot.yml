@@ -1,5 +1,5 @@
-name: Beepboop Starterbot
-description: A simple Python bot sample for Beep Boop
+name: Usher Bot
+description: A Python chat bot that reads config from a google sheet and answers a few questions
 avatar: resources/avatar.png
 background: resources/background.png
 config:
@@ -7,10 +7,10 @@ config:
     friendly_name: Severity level to show for logging.
     info: See https://docs.python.org/2/library/logging.html#levels
     default: DEBUG
-  - name: SECRET
-    friendly_name: Shhhh
-    info: This is an secret option
+  - name: SHEET_CREDS
+    friendly_name: Google Sheets Credentials
+    info: Credentials to give you access to Google Sheets. See here...
     type: secret
-    default: not secret though
+    default: none
 screenshots:
   - screenshot: resources/screenshot1.png
