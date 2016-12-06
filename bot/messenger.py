@@ -152,7 +152,7 @@ class Messenger(object):
         if team == 'nomatch' :
             txt = "Sorry, I don't know!  Blame jake the dog."
         elif team == 'unclear' :
-            txt = "I am not sure, but I will get it for you someday. In the meantime, can I get you a latté?"
+            txt = "I am not sure, but I will get it for you someday. In the meantime, can I get you a latte?"
         else:
             logging.info("Team: " + str(team))
             name = team['Name']
@@ -168,7 +168,7 @@ class Messenger(object):
         if teams == 'nomatch' :
             txt = "Sorry, I don't know!  Blame jake the dog."
         elif teams == 'unclear' :
-            txt = "I'am not sure, but I will get it for you someday."
+            txt = "I am not sure, but I will get it for you someday. Try listening to this: https://www.youtube.com/watch?v=i57FXvL8txY"
         else:
             n = len(teams)
             txts = []
@@ -190,9 +190,9 @@ class Messenger(object):
     def _team_details(self, channel_id, msg_txt):
         team = find_teams(self.teams, msg_txt, 1)
         if team == 'nomatch' :
-            txt = "Sorry, I don't know!  Blame jake the dog."
+            txt = "Sorry, I don't know!  Blame jake the dog. Or you can listen https://www.youtube.com/watch?v=4WjapUvIWgs"
         elif team == 'unclear' :
-            txt = "I'am not sure, but I will get it for you someday."
+            txt = "I am not sure, but I will get it for you someday. Or you can listen https://www.youtube.com/watch?v=4WjapUvIWgs"
         else:
             logging.info("Team: " + str(team))
             name = team['Name']
