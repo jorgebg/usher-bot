@@ -44,7 +44,11 @@ class RtmEventHandler(object):
                     self.msg_writer.write_help_message(event['channel'])
                 # elif re.search('hi|hey|hello|howdy', msg_txt):
                     # self.msg_writer.write_greeting(event['channel'], event['user'])
-                elif re.search('who|how', msg_txt, re.IGNORECASE):
+                elif re.search('describe', msg_txt, re.IGNORECASE):
+                    self.msg_writer.write_team_details(event['channel'], msg_txt)
+                elif re.search('who is on', msg_txt, re.IGNORECASE):
+                    self.msg_writer.write_members(event['channel'], msg_txt)
+                elif re.search('who', msg_txt, re.IGNORECASE):
                     self.msg_writer.write_team(event['channel'], msg_txt)
                 elif 'joke' in msg_txt:
                     self.msg_writer.write_joke(event['channel'])

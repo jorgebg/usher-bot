@@ -20,6 +20,9 @@ def count(term, text):
 
 def score(text, team):
     score = 0
+    for term in team['Name'].split('\n'):
+        score += count(term, text)
+        logger.info('term ' + term + " score: " + str(score))
     for term in team['Terms'].split('\n'):
         score += count(term, text)
         logger.info('term ' + term + " score: " + str(score))
@@ -57,6 +60,7 @@ class Messenger(object):
     def __init__(self, slack_clients):
         self.clients = slack_clients
         self.channels = self.clients.rtm.api_call("channels.list")
+        self.users = self.clients.rtm.api_call("users.list")
 
         creds = os.getenv("SHEETS_CREDS", "None")
         logging.info("SHEETS_CREDS {}".format(os.getenv("SHEETS_CREDS", "None")))
@@ -82,7 +86,7 @@ class Messenger(object):
     
         logging.info(titles);
     
-        rangeName = 'Teams!' + 'A2:J9'
+        rangeName = 'Teams!' + 'A2:J10'
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheetId, range=rangeName).execute()
         values = result.get('values', [])
@@ -95,7 +99,7 @@ class Messenger(object):
             t = {}
             x = 0
             for title in titles[0]:
-                t[title] = row[x]
+                t[title] = row[x].strip()
                 x = x + 1
             teams.append(t)
 
@@ -113,18 +117,46 @@ class Messenger(object):
 
     def write_help_message(self, channel_id):
         bot_uid = self.clients.bot_user_id()
-        txt = '{}\n{}'.format(
+        txt = '{}\n{}\n{}'.format(
             "I'm a friendly Slack bot written in Python.  I'll *_respond_* to the following commands:",
+            "> `describe` _team_",
+            "> `who is on` a _team_",
             "> `who` knows about _something_")
+        self.send_message(channel_id, txt)
+
+    def write_members(self, channel_id, msg_txt):
+        #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
+        self.teams = self.load_config()
+        txt = self._members(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
     def write_team(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
-
         self.teams = self.load_config()
-
         txt = self._team(channel_id, msg_txt)
         self.send_message(channel_id, txt)
+
+    def write_team_details(self, channel_id, msg_txt):
+        #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
+        self.teams = self.load_config()
+        txt = self._team_details(channel_id, msg_txt)
+        self.send_message(channel_id, txt)
+
+    def _members(self, channel_id, msg_txt):
+        team = find_team(self.teams, msg_txt)
+        if team == 'nomatch' :
+            txt = "Sorry, I don't know!  Blame jake the dog."
+        elif team == 'unclear' :
+            txt = "I'am not sure, but I will get it for you someday."
+        else:
+            logging.info("Team: " + str(team))
+            name = team['Name']
+            peeps = team['Individuals'].split('\n')
+            logging.info(peeps)
+            ids = list(map(lambda p: "<" + str(self.lookup_user_id(p)) + ">", peeps))
+            txt = name + " has: \n\t" + "\n\t".join(ids)
+            logging.info(txt)
+        return txt
 
     def _team(self, channel_id, msg_txt):
         team = find_team(self.teams, msg_txt)
@@ -139,11 +171,32 @@ class Messenger(object):
             txt = name + " owns this. See: `<" + self.lookup_channel_id(channel) + ">`"
         return txt
 
+    def _team_details(self, channel_id, msg_txt):
+        team = find_team(self.teams, msg_txt)
+        if team == 'nomatch' :
+            txt = "Sorry, I don't know!  Blame jake the dog."
+        elif team == 'unclear' :
+            txt = "I'am not sure, but I will get it for you someday."
+        else:
+            logging.info("Team: " + str(team))
+            name = team['Name']
+            channel = self.lookup_channel_id(team['Slack channel'])
+            board = team['Trello Board']
+            wiki = team['Wiki home page']
+            txt = "Name {}, channel: `<{}>`, Trello Board: {}, Wiki home: {}".format(name, channel, board, wiki)
+        return txt
+
+    def lookup_user_id(self, user):
+        for x in self.users['members']:
+            if x['name'] == user:
+                return '@' + x['id']
+        return '@' + user # should assert this can't happen
+
     def lookup_channel_id(self, channel):
         for x in self.channels['channels']:
             if x['name'] == channel:
                 return '#' + x['id']
-        return "Unknown" # should assert this can't happen
+        return "#" + channel # should assert this can't happen
 
     def write_prompt(self, channel_id):
         bot_uid = self.clients.bot_user_id()
