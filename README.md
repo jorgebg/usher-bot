@@ -1,6 +1,47 @@
 usher-bot
 =============
 
+## TODO
+
+These are tasks for the related Usher project.  These need to be prioritized
+
+- Bot
+    - X Relearn how to make a slack bot
+    - X Configure slack to listen to our bot
+    - X Configure bot to read config somehow
+    - X Write input parsing code for Will's demo script
+    - Update Bot read google sheet
+    - Improve bot message parsing
+    - Improve bot message formatting (postMessage)
+
+- Config
+    
+    - X Add channels to config.yml
+    - X Consider how to store some of config.yml in a google sheet so it can be easily maintained there.
+
+- Web service
+    - Spec web service that given some input (text, or a hunk of json, etc) will return some team aspect
+    like team name, trello board and list, email address, slack channel
+    - Setup web service host
+    - Setup web service
+
+- Integration with Pingboard
+    - learn Pingboard API
+    - Set up Pingboard Sandbox
+    - Import Udemy data to Sandbox
+    - Write custom fields into Pingboard perhaps by parsing config.yml
+
+- Modify cli to read from Pingboard
+
+- Modify web service to read from CLI
+
+- Update bugreport tapen to use the web service to guess a team/trello board
+
+- Presentation
+    - Design logo :)
+    - Take stills for science board
+    - Script a demo
+
 ## Overview
 A simple starting point for creating a Beep Boop hostable, Python based Slack bot.
 

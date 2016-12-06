@@ -30,7 +30,7 @@ def categorize(text):
     for cat in config['categories']:
         name = cat.iterkeys().next()
         s = score(text, cat.itervalues().next())
-        scores.append({'name': name, 'score': s})
+        scores.append({'name': name, 'score': s, 'cat': cat})
 
     scores = sorted(scores, key=lambda i: i['score'], reverse=True)
 
@@ -41,7 +41,7 @@ def categorize(text):
     if scores[0]['score'] == scores[1]['score']:
         return 'unclear'
     else:
-        return scores[0]['name']
+        return scores[0]
 
 class Messenger(object):
     def __init__(self, slack_clients):
@@ -58,8 +58,9 @@ class Messenger(object):
     def write_help_message(self, channel_id):
         bot_uid = self.clients.bot_user_id()
         txt = '{}\n{}\n{}\n{}'.format(
-            "I'm your friendly Slack bot written in Python.  I'll *_respond_* to the following commands:",
+            "I'm a friendly Slack bot written in Python.  I'll *_respond_* to the following commands:",
             "> `hi <@" + bot_uid + ">` - I'll respond with a randomized greeting mentioning your user. :wave:",
+            "> `how <@" + bot_uid + ">` - some other stuff we need to put here",
             "> `<@" + bot_uid + "> joke` - I'll tell you one of my finest jokes, with a typing pause for effect. :laughing:",
             "> `<@" + bot_uid + "> attachment` - I'll demo a post with an attachment using the Web API. :paperclip:")
         self.send_message(channel_id, txt)
@@ -69,16 +70,29 @@ class Messenger(object):
         txt = '{}, <@{}>!'.format(random.choice(greetings), user_id)
         self.send_message(channel_id, txt)
 
+    def post_answer(self, channel_id, msg_txt):
+        txt = _answer(self, channel_id, msg_txt)
+        # chat.postMessage(self, channel_id, txt)
+
     def write_answer(self, channel_id, msg_txt):
-        best_match = categorize(msg_txt)
-        if best_match == 'nomatch' :
+        txt = _answer(self, channel_id, msg_txt)
+        self.send_message(channel_id, txt)
+
+    def _answer(self, channel_id, msg_txt):
+        match = categorize(msg_txt)
+        if match == 'nomatch' :
             txt = "Sorry, I don't know!  Blame jake the dog"
-        elif best_match == 'unclear' :
+        elif match == 'unclear' :
             txt = "I'm not sure, but I will get it for you someday."
         else:
-            txt = "The group that owns this is: " + best_match
+            cat = match['cat']
+            name = match['name']
+            obj = cat[name]
+            channel = obj['channel']
+            n = obj['board'] # should be fullname or something like that
+            txt = n + " owns this. See: #" + channel
 
-        self.send_message(channel_id, txt)
+        return txt
 
     def write_prompt(self, channel_id):
         bot_uid = self.clients.bot_user_id()

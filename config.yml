@@ -1,16 +1,16 @@
-Bearer: your-token-here
-
 categories:
 
     - channel:
         board: 'Engineering: Channel'
         list: Inbox
+        channel: dev-team-channel
         terms:
             - channel
 
     - discovery:
         board: 'Engineering: Search'
         list: Inbox
+        channel: dev-team-discovery
         terms:
             - discovery
             - index
@@ -19,6 +19,7 @@ categories:
     - queue:
         board: 'Engineering: Team Q'
         list: Inbox
+        channel: dev-team-q
         terms:
             - coding_exercises
             - quiz
@@ -26,11 +27,13 @@ categories:
     - u:
         board: 'Engineering: Team U'
         list: Inbox
+        channel: dev-team-u
         terms:
             - clp
     - g:
         board: 'Engineering: Team G'
         list: Inbox
+        channel: dev-team-g
         terms:
             - AppleInAppPurchaseConnectionException
             - facebookads
@@ -40,6 +43,7 @@ categories:
     - tea:
         board: 'Engineering: Team Tea'
         list: Inbox
+        channel: dev-team-t
         terms:
             - course_management
             - terms
@@ -47,6 +51,7 @@ categories:
 
     - learning:
         board: 'Team L - Inbox'
+        channel: dev-team-l
         list: 
         terms:
             - videojs
@@ -55,6 +60,7 @@ categories:
     - payments:
         board: 'Engineering: Team A - Payment'
         list: 
+        channel: dev-team-payments
         terms:
             - paypal
             - payment
@@ -65,6 +71,7 @@ categories:
     - stream:
         board: 'Engineering: Stream Team'
         list: Inbox
+        channel: dev-stream-team
         terms:
              - asset
              - image
@@ -76,6 +83,7 @@ categories:
     - bedrock:
         board: 'Engineering: Team Bedrock'
         list: Inbox
+        channel: dev-team-b
         terms:
              - zdesk
              - ZenDesk
@@ -83,6 +91,7 @@ categories:
 
     - ufb:
         board: 'Engineering: UFB'
+        channel: team-ufb-eng
         list: Inbox
         terms:
              - organization
