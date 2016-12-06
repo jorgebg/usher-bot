@@ -71,11 +71,11 @@ class Messenger(object):
         self.send_message(channel_id, txt)
 
     def post_answer(self, channel_id, msg_txt):
-        txt = _answer(self, channel_id, msg_txt)
+        txt = self._answer(self, channel_id, msg_txt)
         # chat.postMessage(self, channel_id, txt)
 
     def write_answer(self, channel_id, msg_txt):
-        txt = _answer(self, channel_id, msg_txt)
+        txt = self._answer(self, channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
     def _answer(self, channel_id, msg_txt):
