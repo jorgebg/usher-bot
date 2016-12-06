@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import httplib2
 import logging
+import os
 import random
 import re
-from stemming.porter2 import stem
 import yaml
+
+from apiclient import discovery
+from oauth2client import client
+from stemming.porter2 import stem
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +18,14 @@ config = yaml.load(open("config.yml", 'r'))
 def count(term, text):
     return len(re.findall(term, text, re.I))
 
-def score(text, cat):
+def score(text, team):
     score = 0
-    for term in cat['terms']:
+    for term in team['Terms'].split('\n'):
         score += count(term, text)
+        logger.info('term ' + term + " score: " + str(score))
+    for term in team['Responsibilities'].split('\n'):
+        score += count(term, text)
+        logger.info('resp ' + term + " score: " + str(score))
     return score
         
 def tx(d, s):
@@ -26,12 +35,12 @@ def tx(d, s):
     else :
         return x
 
-def categorize(text):
+def find_team(teams, text):
     scores = []
-    for cat in config['categories']:
-        name = cat.iterkeys().next()
-        s = score(text, cat.itervalues().next())
-        scores.append({'name': name, 'score': s, 'cat': cat})
+    for team in teams:
+        s = score(text, team)
+        logger.info(team['Name'] + " score: " + str(s))
+        scores.append({'score': s, 'team': team})
 
     scores = sorted(scores, key=lambda i: i['score'], reverse=True)
 
@@ -42,13 +51,55 @@ def categorize(text):
     if scores[0]['score'] == scores[1]['score']:
         return 'unclear'
     else:
-        return scores[0]
+        return scores[0]['team']
 
 class Messenger(object):
     def __init__(self, slack_clients):
         self.clients = slack_clients
         self.channels = self.clients.rtm.api_call("channels.list")
+        self.teams = self.load_config()
 
+    def load_config(self):
+        creds = os.getenv("SHEETS_CREDS", "None")
+        logging.info("SHEETS_CREDS {}".format(creds))
+        credentials = client.Credentials.new_from_json(creds)
+    
+        http = credentials.authorize(httplib2.Http())
+        discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
+                        'version=v4')
+        service = discovery.build('sheets', 'v4', http=http,
+                                discoveryServiceUrl=discoveryUrl)
+    
+        spreadsheetId = '14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE'
+
+        rangeName = 'Teams!' + 'A1:J1'
+        result = service.spreadsheets().values().get(
+            spreadsheetId=spreadsheetId, range=rangeName).execute()
+        titles = result.get('values', [])
+    
+        logging.info(titles);
+    
+        rangeName = 'Teams!' + 'A2:J5'
+        result = service.spreadsheets().values().get(
+            spreadsheetId=spreadsheetId, range=rangeName).execute()
+        values = result.get('values', [])
+    
+        logging.debug(values);
+
+        teams = []
+        for row in values:
+            logging.debug(row)
+            t = {}
+            x = 0
+            for title in titles[0]:
+                t[title] = row[x]
+                x = x + 1
+            teams.append(t)
+
+        logging.debug(teams);
+        return teams
+
+     
     def send_message(self, channel_id, msg):
         # in the case of Group and Private channels, RTM channel payload is a complex dictionary
         if isinstance(channel_id, dict):
@@ -64,27 +115,25 @@ class Messenger(object):
             "> `who` knows about _something_")
         self.send_message(channel_id, txt)
 
-    def write_answer(self, channel_id, msg_txt):
+    def write_team(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
-        txt = self._answer(channel_id, msg_txt)
+        txt = self._team(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
-    def _answer(self, channel_id, msg_txt):
-        match = categorize(msg_txt)
-        if match == 'nomatch' :
-            txt = "Sorry, I don't know!  Blame jake the dog"
-        elif match == 'unclear' :
-            txt = "I'm not sure, but I will get it for you someday."
+    def _team(self, channel_id, msg_txt):
+        team = find_team(self.teams, msg_txt)
+        if team == 'nomatch' :
+            txt = "Sorry, I don't know!  Blame jake the dog."
+        elif team == 'unclear' :
+            txt = "I'am not sure, but I will get it for you someday."
         else:
-            cat = match['cat']
-            name = match['name']
-            obj = cat[name]
-            channel = obj['channel']
-            n = obj['board'] # should be fullname or something like that
-            txt = n + " owns this. See: `<" + self.lookup(channel) + ">`"
+            logging.info("Team: " + str(team))
+            name = team['Name']
+            channel = team['Slack channel']
+            txt = name + " owns this. See: `<" + self.lookup_channel_id(channel) + ">`"
         return txt
 
-    def lookup(self, channel):
+    def lookup_channel_id(self, channel):
         for x in self.channels['channels']:
             if x['name'] == channel:
                 return '#' + x['id']
