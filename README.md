@@ -10,7 +10,7 @@ These are tasks for the related Usher project.  These need to be prioritized
     - X Configure slack to listen to our bot
     - X Configure bot to read config somehow
     - X Write input parsing code for Will's demo script
-    - Update Bot read google sheet
+    - X Update Bot read google sheet
     - Improve bot message parsing
     - Improve bot message formatting (postMessage)
 
