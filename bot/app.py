@@ -21,7 +21,7 @@ if __name__ == "__main__":
     logging.info("token: {}".format(slack_token))
 
     sheet_creds = os.getenv("SHEET_CREDS", "None")
-    logger.info("SHEET_CREDS {}".format(sheet_creds))
+    logging.info("SHEET_CREDS {}".format(sheet_creds))
 
     if slack_token == "":
         logging.info("SLACK_TOKEN env var not set, expecting token to be provided by Resourcer events")
