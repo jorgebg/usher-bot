@@ -86,15 +86,23 @@ class Messenger(object):
 
         ## TODO: handle auth failure
 
-        rangeName = 'Teams!' + 'A1:J1'
+        rangeName = 'Data!A1:A1'
+        result = service.spreadsheets().values().get(
+            spreadsheetId=spreadsheetId, range=rangeName).execute()
+        data = result.get('values', [])
+        logging.info(data[0])
+    
+        # TODO: dynamic cols
+
+        rangeName = 'Teams!' + 'A1:K1'
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheetId, range=rangeName).execute()
         titles = result.get('values', [])
     
         logging.info(titles);
     
-        # TODO: dynamically sense # of rows
-        rangeName = 'Teams!' + 'A2:J14'
+        numRows = data[0][0]
+        rangeName = 'Teams!' + 'A2:K' + numRows
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheetId, range=rangeName).execute()
         values = result.get('values', [])
@@ -126,18 +134,32 @@ class Messenger(object):
 
     def write_help_message(self, channel_id):
         bot_uid = self.clients.bot_user_id()
-        txt = '{}\n{}\n{}\n{}'.format(
+        txt = '{}\n{}\n{}\n{}\n{}\n{}'.format(
             "I'm a friendly Slack bot written in Python.  I'll *_respond_* to the following commands:",
             "> `describe` _team_",
             "> `who is on` a _team_",
-            "> `who` knows about _something_")
+            "> `who leads` a _team_",
+            "> `who` knows about _something_",
+            "> `list` (all teams)")
         self.send_message(channel_id, txt)
         self.send_message(channel_id, "I can be configured by editing https://docs.google.com/a/udemy.com/spreadsheets/d/14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE/edit?usp=sharing ; you may need to tell me about the change by sending me a `load` message as well.")
+
+    def write_all_teams(self, channel_id, msg_txt):
+        #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
+        #self.load_config()
+        txt = self._all_teams(channel_id, msg_txt)
+        self.send_message(channel_id, txt)
 
     def write_members(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
         #self.load_config()
         txt = self._members(channel_id, msg_txt)
+        self.send_message(channel_id, txt)
+
+    def write_managers(self, channel_id, msg_txt):
+        #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
+        #self.load_config()
+        txt = self._managers(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
     def write_team(self, channel_id, msg_txt):
@@ -152,6 +174,9 @@ class Messenger(object):
         txt = self._team_details(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
+    def _all_teams(self, channel_id, msg_txt):
+        return "Teams: \n\t" + "\n\t".join(list(map(lambda p: p['Name'], self.teams)))
+
     def _members(self, channel_id, msg_txt):
         team = find_teams(self.teams, msg_txt, 1)
         if team == 'nomatch' :
@@ -165,6 +190,22 @@ class Messenger(object):
             logging.info(peeps)
             ids = list(map(lambda p: "<" + str(self.lookup_user_id(p)) + ">", peeps))
             txt = name + " has: \n\t" + "\n\t".join(ids)
+            logging.info(txt)
+        return txt
+
+    def _managers(self, channel_id, msg_txt):
+        team = find_teams(self.teams, msg_txt, 1)
+        if team == 'nomatch' :
+            txt = "Sorry, I don't know!  Blame jake the dog."
+        elif team == 'unclear' :
+            txt = "I am not sure, but I will get it for you someday. In the meantime, can I get you a latte?"
+        else:
+            logging.info("Team: " + str(team) + "is lead by: ")
+            name = team['Name']
+            peeps = team['Managers'].split('\n')
+            logging.info(peeps)
+            ids = list(map(lambda p: "<" + str(self.lookup_user_id(p)) + ">", peeps))
+            txt = name + " is managed by: \n\t" + "\n\t".join(ids)
             logging.info(txt)
         return txt
 
@@ -201,10 +242,13 @@ class Messenger(object):
         else:
             logging.info("Team: " + str(team))
             name = team['Name']
+            peeps = team['Managers'].split('\n')
+            ids = list(map(lambda p: "<" + str(self.lookup_user_id(p)) + ">", peeps))
+            mgrs = " ".join(ids)
             channel = self.lookup_channel_id(team['Slack channel'])
             board = team['Trello Board']
             wiki = team['Wiki home page']
-            txt = "Name {}, channel: `<{}>`, Trello Board: {}, Wiki home: {}".format(name, channel, board, wiki)
+            txt = "*{}*, Lead by: {}, channel: `<{}>`, Trello Board: {}, Wiki home: {}".format(name, mgrs, channel, board, wiki)
         return txt
 
     def lookup_user_id(self, user):

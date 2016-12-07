@@ -47,8 +47,12 @@ class RtmEventHandler(object):
                 elif 'load' in msg_txt:
                     self.msg_writer.load_config()
                     self.msg_writer.send_message(event['channel'], "All good.")
+                elif re.search('list', msg_txt, re.IGNORECASE):
+                    self.msg_writer.write_all_teams(event['channel'], msg_txt)
                 elif re.search('describe', msg_txt, re.IGNORECASE):
                     self.msg_writer.write_team_details(event['channel'], msg_txt)
+                elif re.search('who leads|who manages', msg_txt, re.IGNORECASE):
+                    self.msg_writer.write_managers(event['channel'], msg_txt)
                 elif re.search('who is on', msg_txt, re.IGNORECASE):
                     self.msg_writer.write_members(event['channel'], msg_txt)
                 elif re.search('who', msg_txt, re.IGNORECASE):
