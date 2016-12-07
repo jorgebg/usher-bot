@@ -84,6 +84,8 @@ class Messenger(object):
     
         spreadsheetId = '14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE'
 
+        ## TODO: handle auth failure
+
         rangeName = 'Teams!' + 'A1:J1'
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheetId, range=rangeName).execute()
@@ -122,12 +124,13 @@ class Messenger(object):
 
     def write_help_message(self, channel_id):
         bot_uid = self.clients.bot_user_id()
-        txt = '{}\n{}\n{}'.format(
+        txt = '{}\n{}\n{}\n{}'.format(
             "I'm a friendly Slack bot written in Python.  I'll *_respond_* to the following commands:",
             "> `describe` _team_",
             "> `who is on` a _team_",
             "> `who` knows about _something_")
         self.send_message(channel_id, txt)
+        self.send_message(channel_id, "I can be configured by editing : https://docs.google.com/a/udemy.com/spreadsheets/d/14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE/edit?usp=sharing ; you may need to tell me about the change by sending me a `load` message as well.")
 
     def write_members(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
