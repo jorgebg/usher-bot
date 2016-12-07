@@ -93,7 +93,8 @@ class Messenger(object):
     
         logging.info(titles);
     
-        rangeName = 'Teams!' + 'A2:J12'
+        # TODO: dynamically sense # of rows
+        rangeName = 'Teams!' + 'A2:J14'
         result = service.spreadsheets().values().get(
             spreadsheetId=spreadsheetId, range=rangeName).execute()
         values = result.get('values', [])
@@ -131,7 +132,7 @@ class Messenger(object):
             "> `who is on` a _team_",
             "> `who` knows about _something_")
         self.send_message(channel_id, txt)
-        self.send_message(channel_id, "I can be configured by editing : https://docs.google.com/a/udemy.com/spreadsheets/d/14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE/edit?usp=sharing ; you may need to tell me about the change by sending me a `load` message as well.")
+        self.send_message(channel_id, "I can be configured by editing https://docs.google.com/a/udemy.com/spreadsheets/d/14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE/edit?usp=sharing ; you may need to tell me about the change by sending me a `load` message as well.")
 
     def write_members(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
