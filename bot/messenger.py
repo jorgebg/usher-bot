@@ -73,7 +73,7 @@ class Messenger(object):
 
         self.http = credentials.authorize(httplib2.Http())
 
-        self.teams = self.load_config()
+        self.load_config()
 
 
     def load_config(self):
@@ -111,7 +111,8 @@ class Messenger(object):
             teams.append(t)
 
         logging.debug(teams);
-        return teams
+
+        self.teams = teams
 
      
     def send_message(self, channel_id, msg):
@@ -134,19 +135,19 @@ class Messenger(object):
 
     def write_members(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
-        #self.teams = self.load_config()
+        #self.load_config()
         txt = self._members(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
     def write_team(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
-        #self.teams = self.load_config()
+        #self.load_config()
         txt = self._team(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
     def write_team_details(self, channel_id, msg_txt):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
-        #self.teams = self.load_config()
+        #self.load_config()
         txt = self._team_details(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
