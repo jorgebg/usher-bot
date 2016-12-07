@@ -57,9 +57,9 @@ class RtmEventHandler(object):
                     self.msg_writer.send_message(event['channel'], "No one is cooler.  Period.")
                 elif re.search('who leads|who manages', msg_txt, re.IGNORECASE):
                     self.msg_writer.write_managers(event['channel'], msg_txt)
-                elif re.search('who is on', msg_txt, re.IGNORECASE):
+                elif re.search('who is on|who is in', msg_txt, re.IGNORECASE):
                     self.msg_writer.write_members(event['channel'], msg_txt)
-                elif re.search('who', msg_txt, re.IGNORECASE):
+                elif re.search('who|what|how', msg_txt, re.IGNORECASE):
                     self.msg_writer.write_team(event['channel'], msg_txt)
                 elif 'joke' in msg_txt:
                     self.msg_writer.write_joke(event['channel'])
