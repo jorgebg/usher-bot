@@ -61,6 +61,8 @@ class RtmEventHandler(object):
                     self.msg_writer.write_members(event['channel'], msg_txt)
                 elif re.search('who|what|how', msg_txt, re.IGNORECASE):
                     self.msg_writer.write_team(event['channel'], msg_txt)
+                elif re.search('team', msg_txt, re.IGNORECASE):
+                    self.msg_writer.write_member_team(event['channel'], msg_txt)
                 elif 'joke' in msg_txt:
                     self.msg_writer.write_joke(event['channel'])
                 elif 'attachment' in msg_txt:

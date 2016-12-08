@@ -59,7 +59,17 @@ def find_teams(teams, text, m):
             return scores[0]['team']
     else:
         return list(map(lambda s: s['team'], scores[0:m]))
-    
+
+
+def find_member_teams(teams, text):
+    teams = []
+    for token in text.split():
+        for team in teams:
+            if token in team['Individuals'].split('\n'):
+                teams.append(team)
+                logger.info(team['Name'] + " has member " + str(token))
+    return teams
+
 
 class Messenger(object):
     def __init__(self, slack_clients):
@@ -140,6 +150,7 @@ class Messenger(object):
             "> `who is on` a _team_",
             "> `who leads` a _team_",
             "> `who` knows about _something_",
+            "> `team` of _someone_",
             "> `list` (all teams)")
         self.send_message(channel_id, txt)
         self.send_message(channel_id, "I can be configured by editing https://docs.google.com/a/udemy.com/spreadsheets/d/14FvIGbgO4iz6ys4vxhRPvQ7UFpdBqSeL55Cn8E3oPqE/edit?usp=sharing ; you may need to tell me about the change by sending me a `load` message as well.")
@@ -172,6 +183,10 @@ class Messenger(object):
         #msg_txt = " ".join(map(lambda w: stem(w), msg_txt.split()))
         #self.load_config()
         txt = self._team_details(channel_id, msg_txt)
+        self.send_message(channel_id, txt)
+
+    def write_member_team(self, channel_id, msg_txt):
+        txt = self._member_team(channel_id, msg_txt)
         self.send_message(channel_id, txt)
 
     def _all_teams(self, channel_id, msg_txt):
@@ -249,6 +264,15 @@ class Messenger(object):
             board = team['Trello Board']
             wiki = team['Wiki home page']
             txt = "*{}*, Lead by: {}, channel: `<{}>`, Trello Board: {}, Wiki home: {}".format(name, mgrs, channel, board, wiki)
+        return txt
+
+    def _member_team(self, channel_id, msg_txt):
+        teams = find_member_teams(self.teams, msg_txt)
+        if not teams:
+            txt = "Sorry, I don't know!  Blame jorge the human."
+        else:
+            txt = "Teams: " + ', '.join([team['Name'] for team in teams])
+            logging.info(txt)
         return txt
 
     def lookup_user_id(self, user):
